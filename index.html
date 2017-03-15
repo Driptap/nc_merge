@@ -1,0 +1,160 @@
+<html>
+	
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		
+		<style>
+			.list-group-item {
+				width: 100% !important;
+				cursor: pointer;
+			}
+		</style>
+		
+	</head>
+
+	<body>
+
+		<nav class="navbar navbar-default">
+		  <div class="container-fluid">
+		    <div class="navbar-header">
+		      <a class="navbar-brand" href="#">Assembler</a>
+		    </div>
+		</nav>
+
+		<div class='container-fluid'>
+			<div class='row'>
+				<div class='col-xs-3'>
+					<h4>
+						Upload Files
+					</h4>
+				</div>
+				<div class='col-xs-3'>
+					<h4>
+						Uploaded Files
+					</h4>
+				</div>
+				<div class='col-xs-3'>
+					<h4>
+						Assembled File
+					</h4>
+				</div>
+			</div>
+			<div class='row'>
+				<div class='col-xs-3' id='filedrop'>
+					Select a file: <input type="file" multiple="multiple">
+				</div>
+				<div class='col-xs-3'>
+					<ul class="list-group" id='droppedFiles'>
+					</ul>
+				</div>
+				<div class='col-xs-3' >
+					<ul class="list-group" id='assembledFile' style='min-height: 300px;'>
+						<span class='info'>
+							Drag files from uploaded files and drop them on here.
+						</span>
+					</ul>
+				</div>
+			</div>
+			<div class='row'>
+				<div class='col-xs-3'>
+
+				</div>
+				<div class='col-xs-3'>
+
+				</div>
+				<div class='col-xs-3'>
+					<button id='clearFileList' class='btn btn-warning'>
+						Reset File
+					</button>
+					<button id='downloadAssembledFile' class='btn btn-info'>
+						Download file
+					</button>
+				</div>
+			</div>
+		</div>
+
+	</body>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+		  	integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+		  	crossorigin="anonymous"></script>
+
+
+	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+	  		integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+	  		crossorigin="anonymous"></script>
+
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+			integrity="	sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+			crossorigin="anonymous"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.7/download.min.js"></script>
+
+	<script>
+		var readers = {};
+
+		function newFiles(e) {
+
+			var files = e.originalEvent.target.files;
+
+			for (var i = 0; i < files.length; i ++) {
+
+				readers['file_' + files[i].name] = {
+					'filename': files[i].name,
+					'filereader': new FileReader()
+				};
+
+				readers['file_' + files[i].name].filereader.readAsBinaryString(files[i]);
+			}
+
+			$('#droppedFiles').empty();
+
+			for (var reader in readers) {
+				var _elem = $('<li>'),
+					_listContainer = $('#droppedFiles');
+
+				_elem.addClass('list-group-item');
+				_elem.get(0).dataset['filereader'] = reader;
+				_elem.text(readers[reader].filename);
+				_listContainer.append(_elem);
+			}
+
+			$('#assembledFile').sortable({
+				revert: true,
+				update: function (e, ui) {
+					$('#assembledFile > span').remove();
+				}
+			});
+
+			$('#droppedFiles > li').draggable({
+				connectToSortable: '#assembledFile',
+				helper: 'clone',
+				revert: 'invalid'
+			});
+
+
+			$(this).replaceWith($(this).val('').clone(true));
+		};
+
+		$('input[type="file"').on('change', newFiles);
+
+		$('#clearFileList').click(function(e) {
+			$('#assembledFile').empty();
+			$('#assembledFile').append("<span class='info'>Drag files from uploaded files and drop them on here.</span>");
+		});
+
+		$('#downloadAssembledFile').click(function(e) {
+			var _files = $('#assembledFile > li'),
+				_output = '';
+
+			for (var i = 0; i < _files.length; i ++) {
+				$(_files[i]).get(0);
+				_output += readers[$(_files[i]).get(0).dataset['filereader']].filereader.result;
+				_output += '\n';
+			}
+
+			download(_output, 'generated_file.ns');
+
+		});
+	</script>
+
+</html>
