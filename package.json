@@ -1,0 +1,19 @@
+{
+  "name": "nc_merge",
+  "version": "1.0.0",
+  "description": "Interface to merge multiple NC files in a specific order",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Driptap/nc_merge.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Driptap/nc_merge/issues"
+  },
+  "homepage": "https://github.com/Driptap/nc_merge#readme"
+}

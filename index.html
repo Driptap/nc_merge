@@ -1,15 +1,15 @@
 <html>
-	
+
 	<head>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-		
+
 		<style>
 			.list-group-item {
 				width: 100% !important;
 				cursor: pointer;
 			}
 		</style>
-		
+
 	</head>
 
 	<body>
@@ -69,6 +69,9 @@
 					<button id='downloadAssembledFile' class='btn btn-info'>
 						Download file
 					</button>
+					<button id='makeAnIncrementFile' class='btn btn-info'>
+						Make an increment file
+					</button>
 				</div>
 			</div>
 		</div>
@@ -88,6 +91,8 @@
 			crossorigin="anonymous"></script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.7/download.min.js"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
 
 	<script>
 		var readers = {};
@@ -147,14 +152,67 @@
 				_output = '';
 
 			for (var i = 0; i < _files.length; i ++) {
-				$(_files[i]).get(0);
 				_output += readers[$(_files[i]).get(0).dataset['filereader']].filereader.result;
 				_output += '\n';
 			}
 
-			download(_output, 'generated_file.ns');
+			download(_output, 'generated_file.gcode');
 
 		});
+
+		function makeIncrementedFile() {
+			var y = 210,
+					x = 10,
+					renderedString = '',
+					templates = [],
+					_files = $('#assembledFile > li');
+
+			if (typeof readers['file_increment_file_1.gcode'] === 'undefined') {
+				alert('No file named increment_file.gcode was uploaded');
+				return;
+			}
+
+			for (var i = 0; i < _files.length; i ++) {
+				if ($(_files[i]).get(0).dataset['filereader'].indexOf('file_increment_file') > -1)
+					templates.push(readers[$(_files[i]).get(0).dataset['filereader']].filereader.result);
+			}
+
+			for (var tInd = 1; tInd <= templates.length; tInd ++) {
+				var maxIncrements = parseInt(prompt("How many times I repeat the print in file file_increment_file_" + tInd + ".gcode print?", "210")),
+						currIncrements = 0;
+
+				while (y >= 10) {
+					while (x <= 210) {
+						currIncrements ++;
+						renderedString += Mustache.render(
+							readers['file_increment_file_' + tInd + '.gcode'].filereader.result, {
+								x_value: x,
+								y_value: y
+						});
+						renderedString += '\n';
+						if (currIncrements === maxIncrements) break;
+						x = x + 10;
+					}
+					if (currIncrements === maxIncrements) break;
+					x = 10;
+					y = y - 10;
+				}
+
+				x = x + 10;
+			}
+
+			download(
+				readers[$(_files[0]).get(0).dataset['filereader']].filereader.result
+					+ '\n'
+					+ renderedString
+					+ '\n'
+					+ readers[$(_files[_files.length - 1]).get(0).dataset['filereader']].filereader.result,
+						'incremented_file.gcode');
+
+		}
+
+		$('#makeAnIncrementFile').click(makeIncrementedFile);
+
 	</script>
 
 </html>
