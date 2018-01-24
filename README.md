@@ -1,10 +1,10 @@
 # nc_merge
-Interface to merge multiple NC files in a specific order
+Interface to merge multiple NC files in a specific order. This helps create auto printable 3d print files.
 
+A single html file, load it into a browser.
+Relies on some CDN content, internet access is required.
 
-## OI!!!!
-
-### WANT TO INCREMENT?
+### Incrementing values in the NC files
 
 *Then read this:*
 
